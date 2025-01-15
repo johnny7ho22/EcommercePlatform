@@ -9,58 +9,10 @@ Buyer::Buyer(int id, string name,int age, int role, string password)
     this->password = password;
 }
 
-//這個部分可以透過command pattern來設計
-void Buyer::userMainFunction()
+void Buyer::showMenu()
 {
-    while(true)
-    {
-        int choose = 0;
-        cout<<"1.查看所有商品 2.購買商品 3.查看訂單 4.刪除訂單 5. 確認訂單 6.修改個人資訊 7.離開"<<endl;
-        cout<<"您的選擇 : ";
-        cin >> choose;
-
-        if(choose == 1) 
-        {
-            showProduct();
-        }
-        else if(choose == 2)
-        {
-            buyProduct();
-
-        }
-        else if(choose == 3)
-        {
-            showOrder();
-        }
-        else if(choose == 4)
-        {
-            deleteOrder();
-        }
-        else if(choose == 5)
-        {
-            confirmOrder();
-        }
-        else if(choose == 6)
-        {
-            editUserInfo(this);
-        }
-        else
-        {
-            system("clear");
-            break;
-        }
-
-        // 當你用 cin >> choose; 讀取用戶輸入時，choose 會被賦予一個值，但按下回車後，緩衝區中仍然有一個換行符 '\n'，
-        //這會被 std::cin.get() 讀取並立即返回，導致它沒有真正等待用戶按任意鍵。
-        //cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); 是用來清除緩衝區中的多餘字符（包括換行符），
-        //這樣在隨後的 std::cin.get() 時能正確等待用戶按任意鍵。
-        cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); 
-        cout << "\n輸入任意鍵以繼續..." << std::endl;
-        std::cin.get();  // 等待用戶按下任意鍵
-        system("clear");
-    }
+    cout<<"1.查看所有商品 2.購買商品 3.查看訂單 4.刪除訂單 5. 確認訂單 6.修改個人資訊 7.離開"<<endl;
 }
-
 
 void Buyer::showProduct()
 {
@@ -81,49 +33,6 @@ void Buyer::showProduct()
     cout<<endl;
 }
 
-void Buyer::buyProduct()
-{
-    
-    showProduct();
-    
-    while(true)
-    {
-        int choose = 0;
-        cout<<"您要做的操作: 1.消費 2.離開"<<endl;
-        cout<<"您的選擇:";
-        cin >>choose;
-
-        if(choose == 1)
-        {
-            int pid = 0;
-            int number = 0;
-
-            cout<<"您要購買的商品 : ";
-            cin >> pid;
-            cout<<"您要多少數量 : ";
-            cin >> number;
-
-            Statement* stmt = conn->createStatement();
-            //取得seller的id
-            string query = "select seller from products where id =" + to_string(pid);
-            ResultSet* res = stmt->executeQuery(query);
-            int seller = 0;
-
-            if(res->next())
-            {
-                seller = res->getInt("seller");
-            }
-
-            //加入訂單
-            query = "insert into orders(uid,pid,sid,amount) values(" + to_string(this->id) + "," + to_string(pid) + "," + to_string(seller) + "," +  to_string(number) + ")";
-            stmt->executeUpdate(query);
-        }
-        else
-        {
-            break;
-        }
-    }    
-}
 
 void Buyer::showOrder()
 {

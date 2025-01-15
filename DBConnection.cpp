@@ -26,11 +26,6 @@ DBConnection* DBConnection::getInstance()
     if(dbInstance == nullptr)
     {
         dbInstance = new DBConnection();
-        cout<<"建立連線"<<endl;
-    }
-    else
-    {
-        cout<<"不需要再建立連線了"<<endl;
     }
     
     return dbInstance;

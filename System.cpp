@@ -43,7 +43,7 @@ void System::start()
             
             system("clear");
 
-            user->userMainFunction();
+            userMainFunction(user);
 
         }
         else if(choose == 2)
@@ -139,7 +139,78 @@ void System::signUp()
 }
 
 
+void System::userMainFunction(User* user)
+{
+    map<int,Command*> commands;
 
+    if(user->role == 1)
+    {
+        commands = {
+            {1, new ShowProductCommand(user)},
+            {2, new BuyProductCommand(new ShowProductCommand(user), user->id)},
+            {3, new ShowOrderCommand(user)},
+            {4, new DeleteOrderCommand(user)},
+            {5, new ConfirmOrderCommand(user)},
+            {6, new EditUserInfo(user)}
+        };
+    }
+    else if(user->role == 2)
+    {
+        commands = {
+            {1, new ShowProductCommand(user)},
+            {2, new SellProductCommand(new ShowProductCommand(user), user->id)},
+            {3, new ShowOrderCommand(user)},
+            {4, new DeleteOrderCommand(user)},
+            {5, new ConfirmOrderCommand(user)},
+            {6, new EditUserInfo(user)}
+        };
+    }
+    else
+    {        
+        commands = {
+            {1, new ShowProductCommand(user)},
+            {2, new DeleteProductCommand(new ShowProductCommand(user))},
+            {3, new ShowOrderCommand(user)},
+            {4, new DeleteOrderCommand(user)},
+            {5, new ConfirmOrderCommand(user)},
+            {6, new ShowUserCommand()},
+            {7,new DeleteUserCommand(new ShowUserCommand())},
+            {8, new EditUserInfo(user)}
+        };
+    }
+
+    while(true)
+    {
+        Command* showMenuCommand = new ShowMenuCommand(user);
+        showMenuCommand->execute();
+        
+        int choose = 0;
+        cout<<"您的選擇 : ";
+        cin >> choose;
+
+    
+
+        if(commands.find(choose) != commands.end())
+        {
+            commands[choose]->execute();
+        }
+        else
+        {
+            system("clear");
+            break;
+        }
+    
+
+        // 當你用 cin >> choose; 讀取用戶輸入時，choose 會被賦予一個值，但按下回車後，緩衝區中仍然有一個換行符 '\n'，
+        //這會被 std::cin.get() 讀取並立即返回，導致它沒有真正等待用戶按任意鍵。
+        //cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); 是用來清除緩衝區中的多餘字符（包括換行符），
+        //這樣在隨後的 std::cin.get() 時能正確等待用戶按任意鍵。
+        cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); 
+        cout << "\n輸入任意鍵以繼續..." << std::endl;
+        std::cin.get();  // 等待用戶按下任意鍵
+        system("clear");
+    }
+}
 
 
 System::~System()

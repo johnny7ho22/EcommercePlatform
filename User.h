@@ -22,13 +22,12 @@ public:
     Connection* conn;
 
     User();
-    virtual void userMainFunction() = 0; //用戶主功能
+    
+    virtual void showMenu() = 0; //顯示菜單
     virtual void showProduct() = 0; //顯示商品
     virtual void showOrder() = 0; //查看訂單
     virtual void deleteOrder() = 0; //刪除訂單
     virtual void confirmOrder() = 0; //確認訂單
-
-    void editUserInfo(User* user); //修改個人資訊
-    
+        
     ~User();
 };

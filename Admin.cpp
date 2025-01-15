@@ -9,65 +9,10 @@ Admin::Admin(int id, string name,int age, int role, string password)
     this->password = password;
 }
 
-//這個部分可以透過command pattern來設計
-void Admin::userMainFunction()
+
+void Admin::showMenu()
 {
-    system("clear");
-
-    while(true)
-    {
-        int choose = 0;
-        cout<<"1.查看商品 2.刪除商品 3.查看訂單 4.刪除訂單 5. 確認訂單 6.查看用戶 7.刪除用戶 8.修改個人資訊 9.離開"<<endl;
-        cout<<"您的選擇 : ";
-        cin >> choose;
-
-        if(choose == 1) 
-        {
-            showProduct();
-        }
-        else if(choose == 2)
-        {
-            deleteProduct();
-        }
-        else if(choose == 3)
-        {
-            showOrder();
-        }
-        else if(choose == 4)
-        {
-            deleteOrder();
-        }
-        else if(choose == 5)
-        {
-            confirmOrder();
-        }
-        else if(choose == 6)
-        {
-            showUser();
-        }
-        else if(choose == 7)
-        {
-            deleteUser();
-        }
-        else if(choose == 8)
-        {
-            editUserInfo(this);
-        }
-        else
-        {
-            system("clear");
-            break;
-        }
-
-        // 當你用 cin >> choose; 讀取用戶輸入時，choose 會被賦予一個值，但按下回車後，緩衝區中仍然有一個換行符 '\n'，
-        //這會被 std::cin.get() 讀取並立即返回，導致它沒有真正等待用戶按任意鍵。
-        //cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); 是用來清除緩衝區中的多餘字符（包括換行符），
-        //這樣在隨後的 std::cin.get() 時能正確等待用戶按任意鍵。
-        cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); 
-        cout << "\n輸入任意鍵以繼續..." << std::endl;
-        std::cin.get();  // 等待用戶按下任意鍵
-        system("clear");
-    }
+    cout<<"1.查看商品 2.刪除商品 3.查看訂單 4.刪除訂單 5. 確認訂單 6.查看用戶 7.刪除用戶 8.修改個人資訊 9.離開"<<endl;
 }
 
 
@@ -105,34 +50,6 @@ void Admin::showProduct()
     cout<<endl;
 }
 
-void Admin::deleteProduct()
-{
-    showProduct();
-
-    while(true)
-    {
-        int choose = 0;
-        cout<<"您要做的操作: 1.刪除商品 2.離開"<<endl;
-        cout<<"您的選擇:";
-        cin >>choose;
-
-        if(choose == 1)
-        {
-            int id;
-
-            cout<<"您要刪除的商品 : ";
-            cin >> id;
-
-            Statement* stmt = conn->createStatement();
-            string query = "delete from products where id = " + to_string(id);
-            stmt->executeUpdate(query);
-        }
-        else
-        {
-            break;
-        }
-    }    
-}
 
 void Admin::showOrder()
 {
@@ -243,61 +160,6 @@ void Admin::confirmOrder()
    
     }
 }
-
-void Admin::showUser()
-{
-    Statement* stmt = conn->createStatement();
-
-    string query = "select * from users";
-
-    ResultSet* res = stmt->executeQuery(query);
-
-    cout<<"所有用戶"<<endl;
-    cout << "ID\tName\tAge\tRole\tPassword"<<endl;
-
-    while(res->next())
-    {
-        cout << res->getInt("id") << "\t" << res->getString("name") << "\t"
-             << res->getInt("age") << "\t" << res->getInt("role") << "\t" 
-             << res->getString("password") <<endl;
-    }
-
-    cout<<endl;
-}
-
-void Admin::deleteUser()
-{
-    showUser();
-
-    while(true)
-    {
-        int choose = 0;
-        
-        cout<<"您要做的操作 : 1.刪除用戶 2.離開"<<endl;
-        cout<<"您的選擇:";
-        cin >>choose;
-
-        if(choose == 1)
-        {
-            int id = 0;//選擇的用戶編號
-            
-            cout<<"選擇你要刪除的用戶 : ";
-            cin >> id;
-
-            Statement* stmt = conn->createStatement();
-            string query = "delete from users where id =" + to_string(id); 
-            stmt->executeUpdate(query);
-        }
-        else
-        {
-            break;
-        }
-   
-    }
-
-} 
-
-
 
 Admin::~Admin()
 {
