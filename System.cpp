@@ -28,6 +28,8 @@ void System::start()
     while(true)
     {
         int choose = 0;
+        User* user = nullptr;
+
         cout<<"歡迎登入電商平台"<<endl;
         cout<<"您要做的操作?"<<endl;
         cout<<"1.登入   2.註冊  3.離開"<<endl;
@@ -37,7 +39,12 @@ void System::start()
         
         if(choose == 1)
         {
-            logIn();
+            user = logIn();
+            
+            system("clear");
+
+            user->userMainFunction();
+
         }
         else if(choose == 2)
         {
@@ -52,10 +59,11 @@ void System::start()
 }
 
 
-void System::logIn()
+User* System::logIn()
 {
     string name;
     string password;
+    User* user = nullptr;
 
 
     cout<<"您的名字 : ";
@@ -79,8 +87,15 @@ void System::logIn()
 
         if(role == 1)
         {
-            User* user = new Buyer(id, name, age, role, password);
-            user->userMainFunction();
+            user = new Buyer(id, name, age, role, password);
+        }
+        else if(role == 2)
+        {
+            user = new Seller(id, name, age, role, password);
+        }
+        else
+        {
+
         }
     }
     else
@@ -94,7 +109,7 @@ void System::logIn()
         system("clear");
     }
     
-    return;
+    return user;
 
 }
 
