@@ -95,7 +95,7 @@ User* System::logIn()
         }
         else
         {
-
+            user = new Admin(id, name, age, role, password);
         }
     }
     else
@@ -124,7 +124,7 @@ void System::signUp()
     cin >> name;
     cout<<"您的年齡 : ";
     cin >> age;
-    cout<<"您是 1.買家 or 2.賣家"<<endl;
+    cout<<"您是 1.買家 or 2.賣家 or 3.管理員"<<endl;
     cout<<"您的選擇 : "; 
     cin >> role;
     cout<<"輸入密碼 : "<<endl;

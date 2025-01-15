@@ -7,6 +7,7 @@
 #include "User.h"
 #include "Buyer.h"
 #include "Seller.h"
+#include "Admin.h"
 
 class System
 {

@@ -15,7 +15,7 @@ void Buyer::userMainFunction()
     while(true)
     {
         int choose = 0;
-        cout<<"1.查看所有商品 2.購買商品 3.查看訂單 4.刪除訂單 5. 確定訂單 6.修改個人資訊 7.離開"<<endl;
+        cout<<"1.查看所有商品 2.購買商品 3.查看訂單 4.刪除訂單 5. 確認訂單 6.修改個人資訊 7.離開"<<endl;
         cout<<"您的選擇 : ";
         cin >> choose;
 
@@ -66,7 +66,7 @@ void Buyer::showProduct()
 {
     Statement* stmt = conn->createStatement();
 
-    string query = "select * from products;";
+    string query = "select * from products order by seller;";
 
     ResultSet* res = stmt->executeQuery(query);
 

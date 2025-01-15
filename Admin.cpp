@@ -1,6 +1,6 @@
-#include "Seller.h"
+#include "Admin.h"
 
-Seller::Seller(int id, string name,int age, int role, string password)
+Admin::Admin(int id, string name,int age, int role, string password)
 {
     this->id = id;
     this->name = name;
@@ -10,14 +10,14 @@ Seller::Seller(int id, string name,int age, int role, string password)
 }
 
 //這個部分可以透過command pattern來設計
-void Seller::userMainFunction()
+void Admin::userMainFunction()
 {
     system("clear");
 
     while(true)
     {
         int choose = 0;
-        cout<<"1.顯示已上架商品 2.上架商品 3.查看買家訂單 4.刪除訂單 5. 確認訂單 6.修改個人資訊 7.離開"<<endl;
+        cout<<"1.查看商品 2.刪除商品 3.查看訂單 4.刪除訂單 5. 確認訂單 6.查看用戶 7.刪除用戶 8.修改個人資訊 9.離開"<<endl;
         cout<<"您的選擇 : ";
         cin >> choose;
 
@@ -27,7 +27,7 @@ void Seller::userMainFunction()
         }
         else if(choose == 2)
         {
-            SellProduct();
+            deleteProduct();
         }
         else if(choose == 3)
         {
@@ -42,6 +42,14 @@ void Seller::userMainFunction()
             confirmOrder();
         }
         else if(choose == 6)
+        {
+            showUser();
+        }
+        else if(choose == 7)
+        {
+            deleteUser();
+        }
+        else if(choose == 8)
         {
             editUserInfo(this);
         }
@@ -63,53 +71,60 @@ void Seller::userMainFunction()
 }
 
 
-void Seller::showProduct()
+void Admin::showProduct()
 {
     Statement* stmt = conn->createStatement();
 
-    string query = "select * from products where seller =" + to_string(this->id);
+    string query = "select * from products order by seller";
 
     ResultSet* res = stmt->executeQuery(query);
 
-    cout<<"您已上架的商品"<<endl;
+
+    cout<<"所有商品"<<endl;
 
     cout << "ID\tName\tPrice\tDescription\tSeller"<<endl;
 
     while(res->next())
     {
+        string seller;
+        ResultSet* res2 = nullptr;
+
+        //取得賣家名稱
+        query = "select name from users where id =" + to_string(res->getInt("seller"));
+
+        res2 = stmt->executeQuery(query);
+
+        if(res2->next())
+            seller = res2->getString("name");
+
         cout << res->getInt("id") << "\t" << res->getString("name") << "\t"
              << res->getInt("price") << "\t" << res->getString("description")
-             << "\t" << res->getInt("seller") <<endl;
+             << "\t" << seller <<endl;
     }
+
     cout<<endl;
 }
 
-void Seller::SellProduct()
+void Admin::deleteProduct()
 {
     showProduct();
 
     while(true)
     {
         int choose = 0;
-        cout<<"您要做的操作: 1.上架商品 2.離開"<<endl;
+        cout<<"您要做的操作: 1.刪除商品 2.離開"<<endl;
         cout<<"您的選擇:";
         cin >>choose;
 
         if(choose == 1)
         {
-            string name;
-            int price;
-            string description;
+            int id;
 
-            cout<<"商品名稱 : ";
-            cin >> name;
-            cout<<"定價 : ";
-            cin >> price;
-            cout<<"商品描述 : ";
-            cin >> description;
+            cout<<"您要刪除的商品 : ";
+            cin >> id;
 
             Statement* stmt = conn->createStatement();
-            string query = "insert into products(name, price, description, seller) values('" + name + "'," + to_string(price) + ", '" + description + "'," + to_string(this->id) +")" ;
+            string query = "delete from products where id = " + to_string(id);
             stmt->executeUpdate(query);
         }
         else
@@ -119,21 +134,22 @@ void Seller::SellProduct()
     }    
 }
 
-void Seller::showOrder()
+void Admin::showOrder()
 {
     Statement* stmt = conn->createStatement();
-    string query = "select * from orders where sid =" + to_string(this->id) + " order by uid";
+    string query = "select * from orders";
     ResultSet* res = stmt->executeQuery(query);
 
 
-    cout<<"以下為買家的訂單:"<<endl;
-    cout << "ID\tBuyer\tProduct\tAmount\tStatus"<<endl;
+    cout<<"所有訂單:"<<endl;
+    cout << "ID\tBuyer\tProduct\tSeller\tAmount\tStatus"<<endl;
     
     while(res->next())
     {
         int id = res->getInt("id");
         string buyer;
         string product;
+        string seller;
         int amount = res->getInt("amount");
         string status = res->getString("status");
 
@@ -145,24 +161,30 @@ void Seller::showOrder()
         if(res2->next())
             buyer = res2->getString("name");
 
-
         //取得商品名稱
         query = "select name from products where id =" + to_string(res->getInt("pid"));     
         res2 = stmt->executeQuery(query);
         if(res2->next())
             product = res2->getString("name");
 
+        //取得賣家名稱
+        query = "select name from users where id =" + to_string(res->getInt("sid"));
+        res2 = stmt->executeQuery(query);
+        if(res2->next())
+        seller = res2->getString("name");
+
 
         cout << id << "\t" 
              << buyer << "\t" 
-             << product << "\t" 
+             << product << "\t"
+             << seller << "\t" 
              << amount << "\t" 
              << status <<endl;
     }
     cout<<endl;
 }
 
-void Seller::deleteOrder()
+void Admin::deleteOrder()
 {
     showOrder();
  
@@ -188,11 +210,10 @@ void Seller::deleteOrder()
         {
             break;
         }
-   
     }    
 }
 
-void Seller::confirmOrder()
+void Admin::confirmOrder()
 {
     showOrder();
 
@@ -207,25 +228,12 @@ void Seller::confirmOrder()
         if(choose == 1)
         {
             int id = 0;//選擇的訂單編號
-            int status_choose = 0; //選擇的物流方式
-            string status; //支付方式
             
             cout<<"選擇你要確認的訂單 : ";
             cin >> id;
-            cout<<"選擇物流方式: 1.海運 2.空運 3. 公路運輸"<<endl;
-            cout<<"您的選擇:";
-            cin >> status_choose;
-
-            if(status_choose == 1)
-                status = "海運";
-            else if(status_choose == 2)
-                status = "空運";
-            else
-                status = "公路運輸";
-            
 
             Statement* stmt = conn->createStatement();
-            string query = "update orders set status = '" + status + "' where id =" + to_string(id); 
+            string query = "update orders set status = '訂單完成' where id =" + to_string(id); 
             stmt->executeUpdate(query);
         }
         else
@@ -236,7 +244,62 @@ void Seller::confirmOrder()
     }
 }
 
-Seller::~Seller()
+void Admin::showUser()
+{
+    Statement* stmt = conn->createStatement();
+
+    string query = "select * from users";
+
+    ResultSet* res = stmt->executeQuery(query);
+
+    cout<<"所有用戶"<<endl;
+    cout << "ID\tName\tAge\tRole\tPassword"<<endl;
+
+    while(res->next())
+    {
+        cout << res->getInt("id") << "\t" << res->getString("name") << "\t"
+             << res->getInt("age") << "\t" << res->getInt("role") << "\t" 
+             << res->getString("password") <<endl;
+    }
+
+    cout<<endl;
+}
+
+void Admin::deleteUser()
+{
+    showUser();
+
+    while(true)
+    {
+        int choose = 0;
+        
+        cout<<"您要做的操作 : 1.刪除用戶 2.離開"<<endl;
+        cout<<"您的選擇:";
+        cin >>choose;
+
+        if(choose == 1)
+        {
+            int id = 0;//選擇的用戶編號
+            
+            cout<<"選擇你要刪除的用戶 : ";
+            cin >> id;
+
+            Statement* stmt = conn->createStatement();
+            string query = "delete from users where id =" + to_string(id); 
+            stmt->executeUpdate(query);
+        }
+        else
+        {
+            break;
+        }
+   
+    }
+
+} 
+
+
+
+Admin::~Admin()
 {
 
 }
