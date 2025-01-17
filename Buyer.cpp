@@ -11,7 +11,7 @@ Buyer::Buyer(int id, string name,int age, int role, string password)
 
 void Buyer::showMenu()
 {
-    cout<<"1.查看所有商品 2.購買商品 3.查看訂單 4.刪除訂單 5. 確認訂單 6.修改個人資訊 7.離開"<<endl;
+    cout<<"1.查看所有商品 2.查看訂單 3.刪除訂單 4. 確認訂單 5.購買商品 6.離開"<<endl;
 }
 
 void Buyer::showProduct()

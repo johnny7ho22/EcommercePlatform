@@ -12,7 +12,7 @@ Admin::Admin(int id, string name,int age, int role, string password)
 
 void Admin::showMenu()
 {
-    cout<<"1.查看商品 2.刪除商品 3.查看訂單 4.刪除訂單 5. 確認訂單 6.查看用戶 7.刪除用戶 8.修改個人資訊 9.離開"<<endl;
+    cout<<"1.查看商品 2.查看訂單 3.刪除訂單 4. 確認訂單 5.刪除商品 6.查看用戶 7.刪除用戶 8.離開"<<endl;
 }
 
 

@@ -5,6 +5,12 @@
 
 
 #include "System.h"
+#include "Buyer.h"
+#include "Seller.h"
+#include "Admin.h"
+#include "BuyerFactory.h"
+#include "SellerFactory.h"
+#include "AdminFactory.h"
 
 
 
@@ -16,37 +22,64 @@ using namespace mysql;
 
 int main() 
 {
-
-
     System* sys = System::getInstance();
-    sys->start();
-    
+    User* user = nullptr;
+
+    while(true)
+    {
+        sys->showMenu();
+
+        int choose = 0;
+        cin >>choose;
+
+        if(choose == 1) //登入
+        {
+            sys->logIn();
+
+            system("clear");
+
+            if(sys->res->next())
+            {                
+                int role = sys->res->getInt("role");
+
+                if(role == 1) 
+                {
+                    sys->userfactory = new BuyerFactory();
+                }
+                else if(role == 2)
+                {
+                    sys->userfactory = new BuyerFactory();
+                }
+                else
+                {
+                    sys->userfactory = new BuyerFactory();
+                }
+
+                sys->userMainFunction();
+            }
+            else
+            {
+                
+                cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); 
+
+                cout<<"此用戶不存在"<<endl;
+                cout << "\n輸入任意鍵以繼續..." << std::endl;
+                std::cin.get();  // 等待用戶按下任意鍵
+
+                system("clear");
+
+            }
+        }
+        else if(choose == 2) //註冊
+        {
+            sys->signUp();
+            system("clear");
+        }
+        else
+        {
+            break;
+        }
+    }
 
     return 0;
 }
-
-
-// //獲取DBConnection的單例實例
-//     DBConnection* dbconnection = DBConnection::getInstance();
-    
-//     //取得MySQL連接
-//     Connection* conn = dbconnection->getConnection();
-
-//     if(conn)
-//     {
-//         //創建SQL查詢語句
-//         Statement *stmt = conn->createStatement();
-//         ResultSet *res = stmt->executeQuery("select * from users");
-
-//         while(res->next())
-//         {
-//             cout << "ID: " << res->getInt("id") << ", Name: " << res->getString("name") << endl;
-//         }
-
-//         delete res;
-//         delete stmt;
-//     }
-//     else
-//     {
-//         cout<<"連接失敗"<<endl;
-//     }

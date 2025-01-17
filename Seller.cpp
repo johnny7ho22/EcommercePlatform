@@ -11,7 +11,7 @@ Seller::Seller(int id, string name,int age, int role, string password)
 
 void Seller::showMenu()
 {
-    cout<<"1.顯示已上架商品 2.上架商品 3.查看買家訂單 4.刪除訂單 5. 確認訂單 6.修改個人資訊 7.離開"<<endl;
+    cout<<"1.顯示已上架商品 2.查看買家訂單 3.刪除訂單 4. 確認訂單 5.上架商品 6.離開"<<endl;
 }
 
 void Seller::showProduct()

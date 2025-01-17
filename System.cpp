@@ -22,44 +22,16 @@ System* System::getInstance()
 }
 
 
-void System::start()
+void System::showMenu()
 {
-
-    while(true)
-    {
-        int choose = 0;
-        User* user = nullptr;
-
-        cout<<"歡迎登入電商平台"<<endl;
-        cout<<"您要做的操作?"<<endl;
-        cout<<"1.登入   2.註冊  3.離開"<<endl;
-        cout<<"您的選擇 : ";
-        cin >>choose;
-
-        
-        if(choose == 1)
-        {
-            user = logIn();
-            
-            system("clear");
-
-            userMainFunction(user);
-
-        }
-        else if(choose == 2)
-        {
-            signUp();
-            system("clear");
-        }
-        else
-        {
-            break;
-        }
-    }
+    cout<<"歡迎登入電商平台"<<endl;
+    cout<<"您要做的操作?"<<endl;
+    cout<<"1.登入   2.註冊  3.離開"<<endl;
+    cout<<"您的選擇 : ";
 }
 
 
-User* System::logIn()
+void System::logIn()
 {
     string name;
     string password;
@@ -71,46 +43,12 @@ User* System::logIn()
     cout<<"您的密碼 : ";
     cin >> password;
 
+   
     Statement* stmt = conn->createStatement(); //創建SQL查詢語句
     
     string query = "Select * from users where name = '" + name + "'" + "and password = '" +password + "'";
 
-    ResultSet* res = stmt->executeQuery(query);
-
-    if(res->next())
-    {
-        int id = res->getInt("id");
-        string name = res->getString("name");
-        int age = res->getInt("age");
-        int role = res->getInt("role");
-        string password = res->getString("password");
-
-        if(role == 1)
-        {
-            user = new Buyer(id, name, age, role, password);
-        }
-        else if(role == 2)
-        {
-            user = new Seller(id, name, age, role, password);
-        }
-        else
-        {
-            user = new Admin(id, name, age, role, password);
-        }
-    }
-    else
-    {
-        cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); 
-
-        cout<<"此用戶不存在"<<endl;
-        cout << "\n輸入任意鍵以繼續..." << std::endl;
-        std::cin.get();  // 等待用戶按下任意鍵
-
-        system("clear");
-    }
-    
-    return user;
-
+    res = stmt->executeQuery(query);
 }
 
 void System::signUp()
@@ -139,44 +77,41 @@ void System::signUp()
 }
 
 
-void System::userMainFunction(User* user)
+void System::userMainFunction()
 {
     map<int,Command*> commands;
 
+    int id = res->getInt("id");
+    string name = res->getString("name");
+    int age = res->getInt("age");
+    int role = res->getInt("role");
+    string password = res->getString("password");
+
+    User* user = userfactory->createUser(id,name,age,role,password);
+
+    commands = {
+        {1, new ShowProductCommand(user)},
+        {2, new ShowOrderCommand(user)},
+        {3, new DeleteOrderCommand(user)},
+        {4, new ConfirmOrderCommand(user)},
+        // {5, new EditUserInfo(user)}
+    };
+
     if(user->role == 1)
     {
-        commands = {
-            {1, new ShowProductCommand(user)},
-            {2, new BuyProductCommand(new ShowProductCommand(user), user->id)},
-            {3, new ShowOrderCommand(user)},
-            {4, new DeleteOrderCommand(user)},
-            {5, new ConfirmOrderCommand(user)},
-            {6, new EditUserInfo(user)}
-        };
+        commands.insert({5, new BuyProductCommand(new ShowProductCommand(user), user->id)});
     }
     else if(user->role == 2)
     {
-        commands = {
-            {1, new ShowProductCommand(user)},
-            {2, new SellProductCommand(new ShowProductCommand(user), user->id)},
-            {3, new ShowOrderCommand(user)},
-            {4, new DeleteOrderCommand(user)},
-            {5, new ConfirmOrderCommand(user)},
-            {6, new EditUserInfo(user)}
-        };
+        commands.insert({5, new SellProductCommand(new ShowProductCommand(user), user->id)});
     }
     else
     {        
-        commands = {
-            {1, new ShowProductCommand(user)},
-            {2, new DeleteProductCommand(new ShowProductCommand(user))},
-            {3, new ShowOrderCommand(user)},
-            {4, new DeleteOrderCommand(user)},
-            {5, new ConfirmOrderCommand(user)},
+        commands.insert({
+            {5, new DeleteProductCommand(new ShowProductCommand(user))},
             {6, new ShowUserCommand()},
-            {7,new DeleteUserCommand(new ShowUserCommand())},
-            {8, new EditUserInfo(user)}
-        };
+            {7,new DeleteUserCommand(new ShowUserCommand())}
+        });
     }
 
     while(true)
@@ -189,7 +124,6 @@ void System::userMainFunction(User* user)
         cin >> choose;
 
     
-
         if(commands.find(choose) != commands.end())
         {
             commands[choose]->execute();
