@@ -9,6 +9,7 @@
 #include "User.h"
 #include "UserCommand.h"
 #include "UserFactory.h"
+#include "UserCommandFactory.h"
 
 class System
 {
@@ -25,6 +26,7 @@ private:
 public:
     UserFactory* userfactory;
     ResultSet* res;
+    map<int,UserCommandFactory*> UserCommandFactory;
     static System* getInstance(); //getInstance() 必須是靜態的，這樣才能通過類名直接訪問，從而創建或返回唯一的靜態物件。
     void showMenu(); //啟動系統
     void logIn(); //用戶登入

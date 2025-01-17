@@ -79,8 +79,6 @@ void System::signUp()
 
 void System::userMainFunction()
 {
-    map<int,Command*> commands;
-
     int id = res->getInt("id");
     string name = res->getString("name");
     int age = res->getInt("age");
@@ -89,44 +87,49 @@ void System::userMainFunction()
 
     User* user = userfactory->createUser(id,name,age,role,password);
 
-    commands = {
-        {1, new ShowProductCommand(user)},
-        {2, new ShowOrderCommand(user)},
-        {3, new DeleteOrderCommand(user)},
-        {4, new ConfirmOrderCommand(user)},
-        // {5, new EditUserInfo(user)}
-    };
-
-    if(user->role == 1)
-    {
-        commands.insert({5, new BuyProductCommand(new ShowProductCommand(user), user->id)});
-    }
-    else if(user->role == 2)
-    {
-        commands.insert({5, new SellProductCommand(new ShowProductCommand(user), user->id)});
-    }
-    else
-    {        
-        commands.insert({
-            {5, new DeleteProductCommand(new ShowProductCommand(user))},
-            {6, new ShowUserCommand()},
-            {7,new DeleteUserCommand(new ShowUserCommand())}
-        });
-    }
-
     while(true)
     {
-        Command* showMenuCommand = new ShowMenuCommand(user);
-        showMenuCommand->execute();
+        map<int,UserCommand*> usercommands;
+
+        usercommands.insert({
+            {0, UserCommandFactory[0]->createUserCommand(user,nullptr)},
+            {1, UserCommandFactory[1]->createUserCommand(user, nullptr)},
+            {2, UserCommandFactory[2]->createUserCommand(user, nullptr)},
+            {3, UserCommandFactory[3]->createUserCommand(user, nullptr)},
+            {4, UserCommandFactory[4]->createUserCommand(user, nullptr)},
+        });
+
+        if(user->role == 1)
+        {
+            usercommands.insert({
+                {5, UserCommandFactory[5]->createUserCommand(user,UserCommandFactory[1]->createUserCommand(user,nullptr))},
+            });
+        }
+        else if(user->role == 2)
+        {
+            usercommands.insert({
+                {5, UserCommandFactory[5]->createUserCommand(user,UserCommandFactory[1]->createUserCommand(user,nullptr))},
+            });
+        }
+        else
+        {
+            usercommands.insert({
+                {5, UserCommandFactory[5]->createUserCommand(nullptr,UserCommandFactory[1]->createUserCommand(user,nullptr))},
+                {6, UserCommandFactory[6]->createUserCommand(nullptr, nullptr)},
+                {7, UserCommandFactory[7]->createUserCommand(nullptr, UserCommandFactory[6]->createUserCommand(nullptr, nullptr))},
+            });
+        }
+
+        usercommands[0]->execute();
         
         int choose = 0;
         cout<<"您的選擇 : ";
         cin >> choose;
 
     
-        if(commands.find(choose) != commands.end())
+        if(usercommands.find(choose) != usercommands.end())
         {
-            commands[choose]->execute();
+            usercommands[choose]->execute();
         }
         else
         {

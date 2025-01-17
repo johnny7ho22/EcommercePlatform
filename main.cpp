@@ -5,14 +5,16 @@
 
 
 #include "System.h"
+
+//用戶相關
 #include "Buyer.h"
 #include "Seller.h"
 #include "Admin.h"
-#include "BuyerFactory.h"
-#include "SellerFactory.h"
-#include "AdminFactory.h"
+#include "AllUserFactory.h"
 
-
+//用戶指令相關
+#include "AllUserCommand.h"
+#include "AllUserCommandFactory.h"
 
 using namespace std;
 using namespace sql;
@@ -39,20 +41,39 @@ int main()
             system("clear");
 
             if(sys->res->next())
-            {                
+            {   
                 int role = sys->res->getInt("role");
+
+                sys->UserCommandFactory.erase(5);
+
+                sys->UserCommandFactory.insert({
+                    {0, new ShowMenuCommandFactory()},
+                    {1, new ShowProductCommandFactory()},
+                    {2, new ShowOrderCommandFactory()},
+                    {3, new DeleteOrderCommandFactory()},
+                    {4, new ConfirmOrderCommandFactory()},
+                });
 
                 if(role == 1) 
                 {
                     sys->userfactory = new BuyerFactory();
+                    sys->UserCommandFactory.insert({5, new BuyProductCommandFactory()});
+
                 }
                 else if(role == 2)
                 {
-                    sys->userfactory = new BuyerFactory();
+                    sys->userfactory = new SellerFactory();
+                    sys->UserCommandFactory.insert({5, new SellProductCommandFactory()});
+
                 }
                 else
                 {
-                    sys->userfactory = new BuyerFactory();
+                    sys->userfactory = new AdminFactory();
+                    sys->UserCommandFactory.insert({
+                        {5, new DeleteProductCommandFactory()},
+                        {6, new ShowUserCommandFactory()},
+                        {7,new DeleteUserCommandFactory()}
+                    });
                 }
 
                 sys->userMainFunction();
